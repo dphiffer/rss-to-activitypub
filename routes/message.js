@@ -1,8 +1,7 @@
-'use strict';
-const express = require('express'),
-      router = express.Router(),
-      Parser = require('rss-parser'),
-      parser = new Parser();
+import express from 'express';
+
+const router = express.Router();
+export default router;
 
 router.get('/:guid', function (req, res) {
   let guid = req.params.guid;
@@ -40,5 +39,3 @@ router.get('/:guid', function (req, res) {
     }
   }
 });
-
-module.exports = router;

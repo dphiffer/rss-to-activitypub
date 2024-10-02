@@ -1,13 +1,13 @@
-const config = require('./config.json');
-const { DOMAIN, PRIVKEY_PATH, CERT_PATH, PORT_HTTP, PORT_HTTPS } = config;
-const Database = require('better-sqlite3');
-const db = new Database('bot-node.db'),
-      Parser = require('rss-parser'),
-      request = require('request'),
-      crypto = require('crypto'),
-      parser = new Parser({timeout: 2000});
+import Database from 'better-sqlite3';
+import Parser from 'rss-parser';
+import crypto from 'crypto';
+import Jackd from 'jackd';
+import config from './config.js';
 
-const Jackd = require('jackd');
+const { DOMAIN, PRIVKEY_PATH, CERT_PATH, PORT_HTTP, PORT_HTTPS } = config;
+
+const db = new Database('bot-node.db');
+const parser = new Parser({timeout: 2000});
 const beanstalkd = new Jackd();
 
 beanstalkd.connect()
@@ -15,10 +15,10 @@ beanstalkd.connect()
 async function processQueue() {
   while (true) {
     try {
-      const { id, payload } = await beanstalkd.reserve()
+      const job = await beanstalkd.reserve()
       /* ... process job here ... */
-      await beanstalkd.delete(id)
-      await doFeed(payload)
+      await beanstalkd.delete(job.id);
+      await doFeed(job.payload.toString());
     } catch (err) {
       // Log error somehow
       console.error(err)
@@ -26,7 +26,7 @@ async function processQueue() {
   }
 }
 
-processQueue()
+processQueue();
 
 function doFeed(feedUrl) {
 return new Promise((resolve, reject) => {
@@ -175,8 +175,7 @@ function signAndSend(message, name, domain, req, res, targetDomain, inbox) {
     const signature_b64 = signature.toString('base64');
     const algorithm = 'rsa-sha256';
     let header = `keyId="https://${domain}/u/${name}",algorithm="${algorithm}",headers="(request-target) host date digest",signature="${signature_b64}"`;
-    request({
-      url: inbox,
+    fetch(inbox, {
       headers: {
         'Host': targetDomain,
         'Date': d.toUTCString(),
@@ -186,9 +185,7 @@ function signAndSend(message, name, domain, req, res, targetDomain, inbox) {
         'Accept': 'application/activity+json'
       },
       method: 'POST',
-      json: true,
       body: message
-    }, function (error, response, body){
     });
   }
 }

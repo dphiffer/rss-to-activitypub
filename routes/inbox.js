@@ -1,9 +1,9 @@
-'use strict';
-const express = require('express'),
-      crypto = require('crypto'),
-      request = require('request'),
-      fs = require('fs'),
-      router = express.Router();
+import express from 'express';
+import crypto from 'crypto';
+import fs from 'fs';
+
+const router = express.Router();
+export default router;
 
 function signAndSend(message, name, domain, req, res, targetDomain) {
   // get the URI of the actor object and append 'inbox' to it
@@ -29,8 +29,7 @@ function signAndSend(message, name, domain, req, res, targetDomain) {
     const signature_b64 = signature.toString('base64');
     const algorithm = 'rsa-sha256';
     let header = `keyId="https://${domain}/u/${name}",algorithm="${algorithm}",headers="(request-target) host date digest",signature="${signature_b64}"`;
-    request({
-      url: inbox,
+    fetch(inbox, {
       headers: {
         'Host': targetDomain,
         'Date': d.toUTCString(),
@@ -40,9 +39,7 @@ function signAndSend(message, name, domain, req, res, targetDomain) {
         'Accept': 'application/activity+json'
       },
       method: 'POST',
-      json: true,
       body: message
-    }, function (error, response, body){
     });
     res.json('done');
   }
@@ -102,5 +99,3 @@ router.post('/', function (req, res) {
     }
   }
 });
-
-module.exports = router;

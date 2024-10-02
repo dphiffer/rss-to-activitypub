@@ -1,15 +1,16 @@
-'use strict';
-const express = require('express'),
-      router = express.Router(),
-      cors = require('cors'),
-      crypto = require('crypto'),
-      request = require('request'),
-      Parser = require('rss-parser'),
-      parseFavicon = require('parse-favicon').parseFavicon,
-      generateRSAKeypair = require('generate-rsa-keypair'),
-      oauth = require('../config.json').OAUTH;
+import express from 'express';
+import cors from 'cors';
+import crypto from 'crypto';
+import Parser from 'rss-parser';
+import { parseFavicon } from 'parse-favicon';
+import generateRSAKeypair from 'generate-rsa-keypair';
+import config from '../config.js';
 
-router.get('/request-token', cors(), (req, res) => {
+const router = express.Router();
+const oauth = config.OAUTH;
+export default router;
+
+router.get('/request-token', cors(), async (req, res) => {
   if (!oauth) {
     return res.status(501).json({message: `OAuth is not enabled on this server.`});
   }
@@ -25,36 +26,37 @@ router.get('/request-token', cors(), (req, res) => {
   params.client_secret = oauth.client_secret;
   params.redirect_uri = oauth.redirect_uri;
   params.grant_type = 'authorization_code';
-  request.post(`https://${oauth.domain}${oauth.token_path}`, {form: params}, (err,httpResponse,body) => {
-    body = JSON.parse(body);
-    if (body.access_token) {
-      return res.json({ access_token: body.access_token, domain: oauth.domain});
-    }
-    else {
-      return res.status(401).json(body);
-    }
+  let response = await fetch(`https://${oauth.domain}${oauth.token_path}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    body: new URLSearchParams(params)
   });
+  let body = await response.json();
+  if (body.access_token) {
+    return res.json({ access_token: body.access_token, domain: oauth.domain});
+  } else {
+    return res.status(401).json(body);
+  }
 });
 
 // if oauth is enabled, this function checks to see if we've been sent an access token and validates it with the server
 // otherwise we simply skip verification
 function isAuthenticated(req, res, next) {
   if (oauth) {
-    request.get({
-      url: `https://${oauth.domain}${oauth.token_verification_path}`,
+    fetch(`https://${oauth.domain}${oauth.token_verification_path}`, {
       headers: {
         'Authorization': `Bearer ${req.query.token}`
-      },
-    }, (err, resp, body) => {
-      if (resp.statusCode === 200) {
-        return next();
       }
-      else {
+    }).then(response => {
+      if (response.status === 200) {
+        return next();
+      } else {
         res.redirect('/');
       }
     });
-  }
-  else {
+  } else {
     return next();
   }
 }
@@ -85,6 +87,7 @@ router.get('/convert', isAuthenticated, function (req, res) {
         res.status(400).json({err: err.message});
       }
       else {
+        console.log(feedData);
         res.status(200).json(feedData);
         let displayName = feedData.title;
         let description = feedData.description;
@@ -98,9 +101,9 @@ router.get('/convert', isAuthenticated, function (req, res) {
           let actorRecord = createActor(account, domain, pair.public, displayName, imageUrl, description);
           let webfingerRecord = createWebfinger(account, domain);
           const apikey = crypto.randomBytes(16).toString('hex');
-          db.prepare('insert or replace into accounts(name, actor, apikey, pubkey, privkey, webfinger) values(?, ?, ?, ?, ?, ?)').run( `${account}@${domain}`, JSON.stringify(actorRecord), apikey, pair.public, pair.private, JSON.stringify(webfingerRecord));
+          let result = db.prepare('insert or replace into accounts(name, actor, apikey, pubkey, privkey, webfinger) values(?, ?, ?, ?, ?, ?)').run( `${account}@${domain}`, JSON.stringify(actorRecord), apikey, pair.public, pair.private, JSON.stringify(webfingerRecord));
           let content = JSON.stringify(feedData);
-          db.prepare('insert or replace into feeds(feed, username, content) values(?, ?, ?)').run( feed, username, content);
+          result = db.prepare('insert or replace into feeds(feed, username, content) values(?, ?, ?)').run( feed, username, content);
         });
       }
     });
@@ -120,15 +123,14 @@ function getImage(feed, feedData, cb) {
   // otherwise parse the HTML for the favicon
   else {
     let favUrl = new URL(feed);
-    request(favUrl.origin, (err, resp, body) => {
-      parseFavicon(body, {baseURI: favUrl.origin}).then(result => {
-        if (result && result.length) {
-          return cb(result[0].url);
-        }
-        else {
-          return cb(null);
-        }
-      });
+    fetch(favUrl.origin).then(response => response.body).then(body => {
+      const result = parseFavicon(body, {baseURI: favUrl.origin});
+      if (result && result.length) {
+        return cb(result[0].url);
+      }
+      else {
+        return cb(null);
+      }
     });
   }
 }
@@ -178,5 +180,3 @@ function createWebfinger(name, domain) {
     ]
   };
 }
-
-module.exports = router;

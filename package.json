@@ -1,28 +1,28 @@
 {
-  "name": "rss-to-activitypub",
-  "version": "2.0.0",
-  "description": "",
-  "main": "index.js",
-  "dependencies": {
-    "better-sqlite3": "^5.0.1",
-    "body-parser": "^1.18.3",
-    "cheerio": "^1.0.0-rc.2",
-    "cors": "^2.8.4",
-    "express": "^4.16.3",
-    "generate-rsa-keypair": "^0.1.2",
-    "jackd": "^1.2.4",
-    "parse-favicon": "^2.0.0",
-    "pug": "^2.0.3",
-    "request": "^2.87.0",
-    "rss-parser": "^3.6.3"
-  },
-  "engines": {
-    "node": ">=10.10.0"
-  },
-  "devDependencies": {},
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
-  "license": "MIT"
+	"name": "rss-to-activitypub",
+	"version": "2.0.0",
+	"description": "",
+	"main": "index.js",
+	"type": "module",
+	"dependencies": {
+		"better-sqlite3": "^11.3.0",
+		"body-parser": "^1.20.3",
+		"cheerio": "^1.0.0",
+		"cors": "^2.8.5",
+		"express": "^4.21.0",
+		"generate-rsa-keypair": "^0.2.1",
+		"jackd": "^2.2.2",
+		"parse-favicon": "^7.0.1",
+		"pug": "^3.0.3",
+		"rss-parser": "^3.13.0"
+	},
+	"engines": {
+		"node": ">=10.10.0"
+	},
+	"devDependencies": {},
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"author": "",
+	"license": "MIT"
 }

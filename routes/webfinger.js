@@ -1,6 +1,7 @@
-'use strict';
-const express = require('express'),
-      router = express.Router();
+import express from 'express';
+
+const router = express.Router();
+export default router;
 
 router.get('/', function (req, res) {
   let resource = req.query.resource;
@@ -19,5 +20,3 @@ router.get('/', function (req, res) {
     }
   }
 });
-
-module.exports = router;

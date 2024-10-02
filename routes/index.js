@@ -1,9 +1,13 @@
-'use strict';
+import api from './api.js';
+import inbox from './inbox.js';
+import message from './message.js';
+import user from './user.js';
+import webfinger from './webfinger.js';
 
-module.exports = {
-  api: require('./api'),
-  inbox: require('./inbox'),
-  message: require('./message'),
-  user: require('./user'),
-  webfinger: require('./webfinger'),
+export default {
+  api,
+  inbox,
+  message,
+  user,
+  webfinger,
 };

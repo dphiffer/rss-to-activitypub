@@ -1,6 +1,7 @@
-'use strict';
-const express = require('express'),
-      router = express.Router();
+import express from 'express';
+
+const router = express.Router();
+export default router;
 
 router.get('/:name', function (req, res) {
   let name = req.params.name;
@@ -78,5 +79,3 @@ router.get('/:name/followers', function (req, res) {
     //res.json(JSON.parse(result.actor));
   }
 });
-
-module.exports = router;

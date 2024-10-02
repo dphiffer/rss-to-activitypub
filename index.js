@@ -1,14 +1,17 @@
-const config = require('./config.json');
+import express from 'express';
+import bodyParser from 'body-parser';
+import cors from 'cors';
+import http from 'http';
+import Database from 'better-sqlite3';
+import fs from 'fs';
+import config from './config.js';
+import routes from './routes/index.js';
+
 const { DOMAIN, PRIVKEY_PATH, CERT_PATH, PORT_HTTP, PORT_HTTPS, OAUTH } = config;
-const express = require('express');
+
 const app = express();
-const Database = require('better-sqlite3');
 const db = new Database('bot-node.db');
-const fs = require('fs');
-const routes = require('./routes'),
-      bodyParser = require('body-parser'),
-      cors = require('cors'),
-      http = require('http');
+
 let sslOptions;
 
 try {

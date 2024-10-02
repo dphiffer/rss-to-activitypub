@@ -1,8 +1,8 @@
-const Database = require('better-sqlite3');
-const db = new Database('bot-node.db');
-const Jackd = require('jackd');
-const beanstalkd = new Jackd();
+import Database from 'better-sqlite3';
+import Jackd from 'jackd';
 
+const beanstalkd = new Jackd();
+const db = new Database('bot-node.db');
 
 async function foo() {
 
@@ -15,7 +15,7 @@ async function foo() {
 
   await beanstalkd.connect()
 
-  for (feed of feeds) {
+  for (let feed of feeds) {
     await beanstalkd.put(feed.feed)
   }
 
@@ -23,4 +23,4 @@ async function foo() {
 
 }
 
-foo()
+foo();
