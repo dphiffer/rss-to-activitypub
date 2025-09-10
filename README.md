@@ -8,7 +8,7 @@ As of the `v2.0.0` release of this project, only users who are authenticated wit
 
 ## Requirements
 
-This requires Node.js v20 or above.
+This requires Node.js v18 or above, but it's recommended that you use v22 LTS.
 
 You also need `beanstalkd` running. This is a simple and fast queueing system we use to manage polling RSS feeds. [Here are installation instructions](https://beanstalkd.github.io/download.html). On a production server you'll want to [install it as a background process](https://github.com/beanstalkd/beanstalkd/tree/master/adm).
 
